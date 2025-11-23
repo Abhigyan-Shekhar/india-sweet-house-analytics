@@ -107,7 +107,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, className 
           const workbook = XLSX.read(data, { type: 'array' });
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
-          const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+          const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null }) as any[][];
 
           const processedData = await processFinancialReport(rawData, file.name);
 
@@ -261,12 +261,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, className 
           'Discount (%)': 0,
           'GST (%)': 0,
           'Gross Amount': parseFloat(row[4]) || 0,
-          PBT: parseFloat(row[9]) || 0,
           EBITDA: parseFloat(row[7]) || 0,
           'Upload Filename': filename,
           'Metric Type': 'Outlet Summary',
           'Percentage': 0,
-          Month: month || currentDate,
           'Item Name': 'Outlet Summary',
           'Store Name': outletName,
           'Cluster Manager': outletManager,
@@ -274,10 +272,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, className 
           'Payment Type': 'N/A',
           'Total Sales': parseFloat(row[4]) || 0,
           Qty: 1,
-          // Additional outlet-specific data
-          'Outlet Name': outletName,
-          'Outlet Manager': outletManager
-        };
+          'Outlet Name': outletName
+        } as Record<string, any>; // Type assertion to allow flexible keys and values
 
         processedData.push(outletRecord);
       }
@@ -452,8 +448,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, className 
 
         <div
           className={`relative border-2 border-dashed rounded-lg p-4 text-center transition-all duration-300 ${isDragOver
-              ? 'border-primary bg-primary/5 shadow-glow'
-              : 'border-border hover:border-primary/50 hover:bg-primary/5'
+            ? 'border-primary bg-primary/5 shadow-glow'
+            : 'border-border hover:border-primary/50 hover:bg-primary/5'
             }`}
           onDrop={handleDrop}
           onDragOver={(e) => {
