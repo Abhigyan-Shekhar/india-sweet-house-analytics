@@ -1,242 +1,193 @@
-# 🚀 Deploying to Render
+# 🚀 Single Web Service Deployment on Render
 
-Complete guide to deploy India Sweet House Analytics on Render.
+Deploy both frontend and backend together as one unified web service!
 
-## 📋 Overview
+## ✨ What This Does
 
-You'll deploy:
-1. **Backend (Python/Flask)** - As a Web Service
-2. **Frontend (React/Vite)** - As a Static Site
+Your Flask backend will serve the built React frontend, so everything runs from one URL!
 
-## 🔧 Backend Deployment
+## � Deployment Steps
 
-### Step 1: Create Web Service
+### 1. Go to Render Dashboard
+- Visit: https://dashboard.render.com
+- Click **"New +"** → **"Web Service"**
 
-1. Go to https://dashboard.render.com
-2. Click **"New +"** → **"Web Service"**
-3. Connect your GitHub repository: `india-sweet-house-analytics`
+### 2. Connect GitHub Repository
+- Select: `Abhigyan-Shekhar/india-sweet-house-analytics`
+- Branch: `main`
 
-### Step 2: Configure Backend Service
+### 3. Configure Web Service
 
 **Basic Settings:**
-- **Name**: `india-sweet-house-backend`
-- **Region**: Choose closest to you
+- **Name**: `india-sweet-house` (or your choice)
+- **Region**: Choose closest to your location
 - **Branch**: `main`
-- **Root Directory**: Leave blank (or set to `/`)
+- **Root Directory**: Leave blank
 - **Runtime**: `Python 3`
 
-**Build & Deploy:**
-- **Build Command**: `pip install -r requirements.txt`
-- **Start Command**: `gunicorn backend_api:app`
+**Build & Deploy Settings:**
 
-### Step 3: Add Environment Variables
+#### Build Command:
+```bash
+./build.sh
+```
+
+#### Start Command:
+```bash
+gunicorn backend_api:app
+```
+
+**Instance Type:**
+- **Free**: Good for testing (sleeps after 15 min)
+- **Starter ($7/month)**: Always-on, recommended for production
+
+### 4. Add Environment Variables
 
 Click **"Advanced"** → **"Add Environment Variable"**
 
-Add these variables:
+Add these (click "+ Add Environment Variable" for each):
+
 ```
-VITE_SUPABASE_URL=https://fyjsmcofbuswelxvgtit.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=your_publishable_key_here
-VITE_SUPABASE_PROJECT_ID=fyjsmcofbuswelxvgtit
+VITE_SUPABASE_URL
+https://fyjsmcofbuswelxvgtit.supabase.co
+
+VITE_SUPABASE_PUBLISHABLE_KEY
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5anNtY29mYnVzd2VseHZndGl0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MzAzMDIsImV4cCI6MjA3MjMwNjMwMn0.if5qYSTUnLErPa0KfrN8KC1xmwElk8LAMZVHmuubgrk
+
+VITE_SUPABASE_PROJECT_ID
+fyjsmcofbuswelxvgtit
 ```
 
-### Step 4: Deploy
+### 5. Deploy!
 
-- **Instance Type**: Free tier is fine for testing
 - Click **"Create Web Service"**
-- Wait for deployment (takes ~5 minutes)
-- You'll get a URL like: `https://india-sweet-house-backend.onrender.com`
+- Wait 5-10 minutes for build and deployment
+- You'll get a URL like: `https://india-sweet-house.onrender.com`
 
 ---
 
-## 🎨 Frontend Deployment
+## 🎯 How It Works
 
-### Step 1: Create Static Site
+1. **Build Phase** (`./build.sh`):
+   - Installs Node.js dependencies
+   - Builds React app → creates `dist/` folder
+   - Installs Python dependencies
 
-1. Go to https://dashboard.render.com
-2. Click **"New +"** → **"Static Site"**
-3. Connect the same GitHub repository
-
-### Step 2: Configure Frontend
-
-**Basic Settings:**
-- **Name**: `india-sweet-house-frontend`
-- **Branch**: `main`
-- **Root Directory**: Leave blank
-
-**Build & Deploy:**
-- **Build Command**: `npm install && npm run build`
-- **Publish Directory**: `dist`
-
-### Step 3: Add Environment Variables
-
-Add these variables:
-```
-VITE_SUPABASE_URL=https://fyjsmcofbuswelxvgtit.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=your_publishable_key_here
-VITE_SUPABASE_PROJECT_ID=fyjsmcofbuswelxvgtit
-```
-
-### Step 4: Update Backend URL
-
-After backend is deployed, add:
-```
-VITE_BACKEND_URL=https://india-sweet-house-backend.onrender.com
-```
-
-### Step 5: Deploy
-
-- Click **"Create Static Site"**
-- Wait for build (~3-5 minutes)
-- You'll get a URL like: `https://india-sweet-house-frontend.onrender.com`
-
----
-
-## 🔗 Connect Frontend to Backend
-
-Update the backend URL in your frontend code:
-
-**Option 1: Using Environment Variable (Recommended)**
-
-In `src/hooks/useFileUpload.ts`, update line 6:
-```typescript
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-```
-
-In `src/components/FileUpload.tsx`, update line 21:
-```typescript
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-```
-
-Then add to Render environment variables:
-```
-VITE_BACKEND_URL=https://india-sweet-house-backend.onrender.com
-```
-
-**Option 2: Hardcode (Quick Fix)**
-
-Replace `http://localhost:5000` with your backend URL in:
-- `src/hooks/useFileUpload.ts`
-- `src/components/FileUpload.tsx`
-
----
-
-## ⚡ Important Notes
-
-### Free Tier Limitations
-- **Cold starts**: Services sleep after 15 min of inactivity
-- **First request**: May take 30-60 seconds to wake up
-- **Solution**: Upgrade to paid tier ($7/month) for always-on
-
-### CORS Configuration
-Your backend already has CORS enabled in `backend_api.py`:
-```python
-CORS(app)  # ✅ Already configured
-```
-
-### Custom Domain (Optional)
-- Go to your service → Settings → Custom Domain
-- Add your domain and follow DNS instructions
+2. **Runtime** (`gunicorn backend_api:app`):
+   - Flask serves API endpoints (`/api/*`)
+   - Flask serves React app from `dist/` folder
+   - Everything accessible from one URL!
 
 ---
 
 ## 🧪 Testing Your Deployment
 
-1. **Test Backend**: 
-   ```bash
-   curl https://india-sweet-house-backend.onrender.com/health
-   ```
-   Should return: `{"status": "healthy"}`
+Once deployed, visit your Render URL:
 
-2. **Test Frontend**:
-   - Visit: `https://india-sweet-house-frontend.onrender.com`
-   - Upload a test Excel file
-   - Check data appears in Supabase
+### Test Homepage:
+```
+https://your-app.onrender.com
+```
+Should show the React dashboard
+
+### Test Backend API:
+```
+https://your-app.onrender.com/health
+```
+Should return: `{"status": "healthy", "message": "Backend API is running"}`
+
+### Upload a File:
+1. Go to your deployed URL
+2. Upload an Excel file
+3. Data should save to Supabase
+4. Refresh page - data persists!
 
 ---
 
-## 🔄 Auto-Deploy Setup
+## 🔄 Auto-Deploy
 
-Render automatically deploys when you push to GitHub!
+Render automatically redeploys when you push to GitHub:
 
 ```bash
 git add .
 git commit -m "Update feature"
 git push origin main
-# Render automatically deploys both services
+# Render automatically rebuilds and deploys
 ```
 
 ---
 
-## 📊 Monitoring
+## ⚡ Quick Commands Reference
 
-**Backend Logs:**
-- Render Dashboard → Backend Service → Logs
-- Monitor API requests and errors
+### Build Command:
+```bash
+./build.sh
+```
 
-**Frontend:**
-- Static sites don't have server logs
-- Use browser console for errors
-- Check Supabase logs for database issues
+### Start Command:
+```bash
+gunicorn backend_api:app
+```
 
----
-
-## 💰 Pricing
-
-**Free Tier (Current):**
-- ✅ 750 hours/month (limited to services)
-- ✅ Automatic SSL
-- ✅ Continuous deployment
-- ⚠️ Services sleep after 15 min inactivity
-
-**Starter Plan ($7/month per service):**
-- ✅ Always-on services (no sleeping)
-- ✅ Faster builds
-- ✅ Priority support
+### Environment Variables:
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+- `VITE_SUPABASE_PROJECT_ID`
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Backend won't start
-- Check logs in Render Dashboard
-- Verify all environment variables are set
-- Ensure `requirements.txt` is complete
+### Build Fails
+- Check Render logs for specific error
+- Verify `build.sh` has execute permission
+- Check all dependencies in `package.json` and `requirements.txt`
 
-### Frontend can't connect to backend
-- Check CORS in `backend_api.py`
-- Verify `VITE_BACKEND_URL` is set correctly
-- Check browser console for errors
+### Can't Access Frontend
+- Check if `dist/` folder was created during build
+- Verify static folder configuration in `backend_api.py`
 
-### Database connection fails
-- Verify Supabase credentials in environment variables
+### API Endpoints Not Working
+- Check that routes start with `/` (e.g., `/health`, `/process-file`)
+- Verify CORS is enabled in `backend_api.py`
+
+### Database Connection Issues
+- Verify all 3 Supabase environment variables are set
 - Check Supabase project is active
-- Test connection locally first
+- Test connection using `/health` endpoint
+
+---
+
+## 💰 Costs
+
+**Free Tier:**
+- ✅ 750 hours/month
+- ✅ Automatic SSL
+- ✅ Git-based deployment
+- ⚠️ Service sleeps after 15 min (30-60s wake time)
+
+**Starter Plan ($7/month):**
+- ✅ Always-on (no sleeping)
+- ✅ Faster builds
+- ✅ Better for production
 
 ---
 
 ## ✅ Deployment Checklist
 
-Backend:
-- [ ] Repository connected
-- [ ] Python 3 runtime selected
-- [ ] Build command: `pip install -r requirements.txt`
+- [ ] GitHub repository connected
+- [ ] Runtime: Python 3
+- [ ] Build command: `./build.sh`
 - [ ] Start command: `gunicorn backend_api:app`
-- [ ] Environment variables added
-- [ ] Health check passing
-
-Frontend:
-- [ ] Repository connected
-- [ ] Build command: `npm install && npm run build`
-- [ ] Publish directory: `dist`
-- [ ] Environment variables added
-- [ ] Backend URL configured
-- [ ] Can upload files successfully
+- [ ] All 3 environment variables added
+- [ ] Service deployed successfully
+- [ ] Can access frontend at your Render URL
+- [ ] `/health` endpoint returns success
+- [ ] Can upload Excel files
+- [ ] Data persists in Supabase
 
 ---
 
-**Your app is ready for production! 🎉**
+**That's it! Single deployment, single URL, everything works! 🎉**
 
-URLs:
-- Backend: `https://india-sweet-house-backend.onrender.com`
-- Frontend: `https://india-sweet-house-frontend.onrender.com`
+Your live URL: `https://your-service-name.onrender.com`

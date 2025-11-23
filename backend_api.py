@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import pandas as pd
 import numpy as np
@@ -31,8 +31,20 @@ else:
     print("[WARNING] Supabase credentials not found in environment variables")
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='dist', static_url_path='')
 CORS(app)  # Enable CORS for frontend communication
+
+# Serve React App
+@app.route('/')
+def serve_react_app():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/<path:path>')
+def serve_static(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 # Configuration
 UPLOAD_FOLDER = 'uploads'
