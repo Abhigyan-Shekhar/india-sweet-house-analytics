@@ -1,13 +1,15 @@
 #!/bin/bash
 # Build script for Render deployment
 
-echo "Installing Node dependencies..."
-npm install
-
-echo "Building React frontend..."
-npm run build
-
-echo "Installing Python dependencies..."
+echo "=== Installing Python dependencies ==="
+pip install --upgrade pip
 pip install -r requirements.txt
 
-echo "Build complete!"
+echo "=== Installing Node dependencies ==="
+npm install
+
+echo "=== Building React frontend ==="
+npm run build
+
+echo "=== Build complete! ==="
+ls -la dist/
