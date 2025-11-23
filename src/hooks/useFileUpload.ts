@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from './use-toast';
 
-const BACKEND_URL = 'http://localhost:5000';
+// Use empty string in production (same origin), localhost in dev
+const BACKEND_URL = import.meta.env.DEV ? 'http://localhost:5000' : '';
 
 export const useFileUpload = () => {
     const [isUploading, setIsUploading] = useState(false);
