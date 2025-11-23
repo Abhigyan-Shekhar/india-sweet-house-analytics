@@ -70,21 +70,10 @@ const Index = () => {
   }, [outlets]);
 
   const handleFileUpload = async (data: any[], filename: string) => {
-    if (isUploading) {
-      toast({
-        title: 'Upload in progress',
-        description: 'Please wait for the current upload to complete',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    // The FileUpload component already processes the file with the backend
-    // We just need to use uploadFile hook which handles both backend processing and Supabase upload
-    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-    const file = new File([blob], filename, { type: 'application/json' });
-
-    await uploadFile(file);
+    // This callback is called by FileUpload component after backend processes the file
+    // The FileUpload component now handles everything internally via useFileUpload hook
+    // Just log for debugging
+    console.log(`File ${filename} uploaded with ${data.length} records`);
   };
 
   const renderActiveTab = () => {
@@ -150,8 +139,8 @@ const Index = () => {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium transition-all duration-200 ${isActive
-                        ? 'bg-white text-hickory-800 shadow-soft hover:bg-white'
-                        : 'text-white/80 hover:text-white hover:bg-white/10'
+                      ? 'bg-white text-hickory-800 shadow-soft hover:bg-white'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
                       }`}
                   >
                     <span className="font-medium text-sm">{tab.label}</span>

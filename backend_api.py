@@ -34,18 +34,6 @@ else:
 app = Flask(__name__, static_folder='dist', static_url_path='')
 CORS(app)  # Enable CORS for frontend communication
 
-# Serve React App
-@app.route('/')
-def serve_react_app():
-    return send_from_directory(app.static_folder, 'index.html')
-
-@app.route('/<path:path>')
-def serve_static(path):
-    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-        return send_from_directory(app.static_folder, path)
-    else:
-        return send_from_directory(app.static_folder, 'index.html')
-
 # Configuration
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'xlsx', 'xls', 'csv'}
@@ -1034,9 +1022,27 @@ def interest_analysis():
             "traceback": traceback.format_exc()
         }), 500
 
+# Static file serving (must be AFTER all API routes to avoid conflicts)
+@app.route('/')
+def serve_react_app():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/\u003cpath:path\u003e')
+def serve_static(path):
+    # Check if it's an API route first
+    if path.startswith(('health', 'process-file', 'upload-to-supabase', 'interest-analysis')):
+        # Let Flask handle the 404
+        return None
+    
+    # Serve static files
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:
+        # Fallback to index.html for client-side routing
+        return send_from_directory(app.static_folder, 'index.html')
+
 if __name__ == '__main__':
-    print("Starting Financial Data Processing API...")
-    print("API will be available at: http://localhost:5000")
-    print("Health check: http://localhost:5000/health")
-    print("Process file: POST http://localhost:5000/process-file")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Use PORT from environment variable (Render provides this)
+    port = int(os.environ.get('PORT', 5000))
+    # Run the Flask app
+    app.run(host='0.0.0.0', port=port, debug=False)
